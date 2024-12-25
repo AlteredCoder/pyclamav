@@ -1,0 +1,17 @@
+[project]
+name = "pyclamav"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dateparser>=1.2.0",
+    "logging>=0.4.9.6",
+    "pre-commit>=4.0.1",
+    "pyclamd>=0.4.0",
+    "pydantic>=2.10.5",
+    "pytest>=8.3.4",
+    "python-json-logger>=3.2.1",
+    "requests>=2.32.3",
+    "ruff>=0.9.1",
+]
