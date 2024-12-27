@@ -1,6 +1,3 @@
-Bien sûr ! Voici le contenu complet du fichier README en markdown que vous pouvez copier et coller directement :
-
-```markdown
 # pyclamav
 
 `pyclamav` is a Python utility script that uses the `pyclamd` library to run ClamAV scans on specified folders and files that have been modified within a specified duration. This tool is configurable via a JSON configuration file and command-line arguments.
@@ -34,6 +31,7 @@ sudo systemctl enable clamav-daemon
 ```
 
 You can add the following cronjob configuration:
+
 ```
 0 2 * * * /usr/bin/freshclam
 ```
