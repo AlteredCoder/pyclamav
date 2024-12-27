@@ -1,0 +1,8 @@
+{
+    "folders" : [
+        "/var/www/librinova/web/public/",
+        "/home/kevops/project/pyclamav/"
+    ],
+    "log_file": "pyclamav.log",
+    "nb_process" : 1
+}
