@@ -42,14 +42,6 @@ You can add the following cronjob configuration:
 pip install -r requirements.txt
 ```
 
-3. **Install pyclamav**: Clone the repository and install the script.
-
-```bash
-git clone https://github.com/yourusername/pyclamav.git
-cd pyclamav
-pip install .
-```
-
 ## Configuration
 
 Create a JSON configuration file (e.g., `config.json`) with the following structure:
@@ -109,6 +101,14 @@ pyclamav --config config.json --modified-duration 1h --verbose
 
 ```bash
 pyclamav --config config.json --process 10
+```
+
+## Cron
+
+Add the following cronjob configuration to run it everyday
+
+```
+0 0 * * * /path/to/venv/bin/python3.11 /path/to/pyclamav/pyclamav.py -c /path/to/pyclamav/config.json
 ```
 
 ## Logging

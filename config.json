@@ -1,8 +1,6 @@
 {
-    "folders" : [
-        "/var/www/librinova/web/public/",
-        "/home/kevops/project/pyclamav/"
-    ],
-    "log_file": "pyclamav.log",
-    "nb_process" : 1
+    "folders" : [],
+    "log_folder": "/var/log/pyclamav/",
+    "nb_process" : 2,
+    "modified_file_since" : "24h"
 }
