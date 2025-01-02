@@ -8,10 +8,9 @@
 ## Features
 
 - Scan specified folders for viruses using ClamAV.
-- Scan files modified within a specified duration.
+- Scan files modified within a specified duration (or all files if not specified).
 - Configurable via a JSON configuration file.
 - Command-line arguments for flexibility.
-- Multiprocessing support for improved performance.
 
 ## Installation
 
@@ -54,15 +53,13 @@ Create a JSON configuration file (e.g., `config.json`) with the following struct
     "folders": ["/path/to/folder1", "/path/to/folder2"],
     "log_file": "pyclamav.log",
     "modified_file_since": "24h",
-    "nb_process": 5,
     "verbose": false
 }
 ```
 
 - `folders`: List of folders to monitor.
 - `log_file`: Path to the log file.
-- `modified_file_since`: Duration for which files will be scanned (e.g., `24h` for 24 hours).
-- `nb_process`: Number of processes to use for scanning.
+- `modified_file_since`: Duration for which files will be scanned (e.g., `24h` for 24 hours). If this value is not specified, all the files will be scanned
 - `verbose`: Verbose mode (true or false).
 
 ## Usage
@@ -70,7 +67,7 @@ Create a JSON configuration file (e.g., `config.json`) with the following struct
 Run the `pyclamav` script with the following command:
 
 ```bash
-pyclamav --config config.json [--modified-since DURATION] [--verbose] [--process NB_PROCESS]
+pyclamav --config config.json [--modified-since DURATION] [--verbose]
 ```
 
 ### Arguments
@@ -78,7 +75,6 @@ pyclamav --config config.json [--modified-since DURATION] [--verbose] [--process
 - `--config`: Path to the JSON configuration file. Default is `config.json`.
 - `--modified-since`: Duration for which files will be scanned (e.g., `24h` for 24 hours, `48h` for 48 hours). Default is `24h`.
 - `--verbose`: Enable verbose mode. Default is `False`.
-- `--process`: Number of processes to use for scanning. Default is `5`.
 
 ### Examples
 
@@ -109,12 +105,6 @@ pyclamav --config config.json --modified-since 7d
 
 ```bash
 pyclamav --config config.json --modified-since 1h --verbose
-```
-
-4. **Scan folders using 10 processes**:
-
-```bash
-pyclamav --config config.json --process 10
 ```
 
 ## Cron
