@@ -1,3 +1,8 @@
+<p align="center">
+<img src="https://github.com/AlteredCoder/pyclamav/actions/workflows/pytest.yml/badge.svg">
+<img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AlteredCoder/88ae1c5c4c732ba28346b3fac87b44a3/raw/covbadge.json">
+</p>
+
 # pyclamav
 
 `pyclamav` is a Python utility script that uses the `pyclamd` library to run ClamAV scans on specified folders and files that have been modified within a specified duration. This tool is configurable via a JSON configuration file and command-line arguments.
@@ -5,10 +10,9 @@
 ## Features
 
 - Scan specified folders for viruses using ClamAV.
-- Scan files modified within a specified duration.
+- Scan files modified within a specified duration (or all files if not specified).
 - Configurable via a JSON configuration file.
 - Command-line arguments for flexibility.
-- Multiprocessing support for improved performance.
 
 ## Installation
 
@@ -50,16 +54,14 @@ Create a JSON configuration file (e.g., `config.json`) with the following struct
 {
     "folders": ["/path/to/folder1", "/path/to/folder2"],
     "log_file": "pyclamav.log",
-    "modified_file_duration": "24h",
-    "nb_process": 5,
+    "modified_file_since": "24h",
     "verbose": false
 }
 ```
 
 - `folders`: List of folders to monitor.
 - `log_file`: Path to the log file.
-- `modified_file_duration`: Duration for which files will be scanned (e.g., `24h` for 24 hours).
-- `nb_process`: Number of processes to use for scanning.
+- `modified_file_since`: Duration for which files will be scanned (e.g., `24h` for 24 hours). If this value is not specified, all the files will be scanned
 - `verbose`: Verbose mode (true or false).
 
 ## Usage
@@ -67,17 +69,27 @@ Create a JSON configuration file (e.g., `config.json`) with the following struct
 Run the `pyclamav` script with the following command:
 
 ```bash
-pyclamav --config config.json [--modified-duration DURATION] [--verbose] [--process NB_PROCESS]
+pyclamav --config config.json [--modified-since DURATION] [--verbose]
 ```
 
 ### Arguments
 
 - `--config`: Path to the JSON configuration file. Default is `config.json`.
-- `--modified-duration`: Duration for which files will be scanned (e.g., `24h` for 24 hours, `48h` for 48 hours). Default is `24h`.
+- `--modified-since`: Duration for which files will be scanned (e.g., `24h` for 24 hours, `48h` for 48 hours). Default is `24h`.
 - `--verbose`: Enable verbose mode. Default is `False`.
-- `--process`: Number of processes to use for scanning. Default is `5`.
 
 ### Examples
+
+A test data file is available in `./tests/data/`.
+
+You can use the following `config.json` file to test:
+
+```json
+{
+    "folders" : ["./tests/data"],
+    "log_folder": "./logs/",
+}
+```
 
 1. **Scan folders specified in the configuration file**:
 
@@ -88,19 +100,13 @@ pyclamav --config config.json
 2. **Scan folders and files modified in the last 7 days**:
 
 ```bash
-pyclamav --config config.json --modified-duration 7d
+pyclamav --config config.json --modified-since 7d
 ```
 
 3. **Scan folders and files modified in the last 1 hour with verbose mode**:
 
 ```bash
-pyclamav --config config.json --modified-duration 1h --verbose
-```
-
-4. **Scan folders using 10 processes**:
-
-```bash
-pyclamav --config config.json --process 10
+pyclamav --config config.json --modified-since 1h --verbose
 ```
 
 ## Cron

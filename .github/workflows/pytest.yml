@@ -1,0 +1,32 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+      - name: Run the tests
+        run: pytest --cov --cov-report=json:coverage.json tests/
+      - name: Extract coverage
+        run: echo "total=$(cat coverage.json | jq -r '.totals.percent_covered_display')" >> $GITHUB_ENV
+      - name: "Make badge"
+        uses: schneegans/dynamic-badges-action@v1.4.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: 88ae1c5c4c732ba28346b3fac87b44a3 
+          filename: covbadge.json
+          label: Coverage
+          message: ${{ env.total }}%
+          minColorRange: 50
+          maxColorRange: 90
+          valColorRange: ${{ env.total }}

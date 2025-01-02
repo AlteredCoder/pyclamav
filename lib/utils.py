@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 def create_file_folder(filepath):
     """
     Ensure that the directory for the given filepath exists.
