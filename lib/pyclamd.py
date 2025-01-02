@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # LICENSE:
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -15,16 +15,16 @@
 # You should have received a copy of the GNU Lesser General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 675 Mass Ave, Cambridge, MA 02139, USA.
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # CHANGELOG:
 # 2006-07-15 v0.1.1 AN: - released version
 # 2007-10-09 v0.2.0 PL: - fixed error with deprecated string exceptions
-#			- added optional timeout to sockets to avoid blocking
-#			  operations
+# 			- added optional timeout to sockets to avoid blocking
+# 			  operations
 # 2010-07-11 v0.2.1 AN: - change all raise exception (was deprecated), license
-#						  change to LGPL
+# 						  change to LGPL
 # 2010-07-12 v0.2.2 TK: - PEP8 compliance
-#						  isolating send and receive functions
+# 						  isolating send and receive functions
 # 2012-11-20 v0.3.0 AN: - change API to class model
 #                       - using INSTREAM scan method instead of the deprecated STREAM
 #                       - added MULTISCAN method
@@ -56,7 +56,7 @@
 # 2016-08-07 v0.3.17 AN: - typo change (Connexion to Connection)
 # 2017-08-27 v0.4.0 RC: - modified scan_stream() to add support for passing file-like objects
 #                   BM: - add allmatchscan with file and directory support
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # TODO:
 # - improve tests for Win32 platform (avoid to write EICAR file to disk, or
 #   protect it somehow from on-access AV, inside a ZIP/GZip archive isn't enough)
@@ -64,9 +64,8 @@
 #   (for example provide session mode in a Clamd class)
 # - add support for RAWSCAN commands ?
 # ? Maybe use os.abspath to ensure scan_file uses absolute paths for files
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Documentation : http://www.clamav.net/doc/latest/html/node28.html
-
 
 
 """
@@ -149,6 +148,7 @@ import time
 
 ############################################################################
 
+
 class BufferTooLongError(ValueError):
     """Class for errors with clamd using INSTREAM with a buffer lenght > StreamMaxLength in /etc/clamav/clamd.conf or /etc/clamd.conf"""
 
@@ -160,9 +160,12 @@ class ConnectionError(socket.error):
 # Python 2/3 compatibility
 try:
     basestring  # attempt to evaluate basestring
+
     def isstr(s):
         return isinstance(s, basestring)
+
 except NameError:
+
     def isstr(s):
         return isinstance(s, str)
 
@@ -183,13 +186,12 @@ class _ClamdGeneric(object):
         # Return a str with python2 and bytes with python3
 
         # B64 without the final newline to avoid clam picking it up in pyc file
-        eicar_b64 = 'WDVPIVAlQEFQWzRcUFpYNTQoUF4pN0NDKTd9JEVJQ0FSLVNUQU5EQVJELUFOVElWSVJVUy1URVNU\nLUZJTEUhJEgrSCo='
+        eicar_b64 = "WDVPIVAlQEFQWzRcUFpYNTQoUF4pN0NDKTd9JEVJQ0FSLVNUQU5EQVJELUFOVElWSVJVUy1URVNU\nLUZJTEUhJEgrSCo="
         # Add new line separately
-        eicar_b64 = '%s\n' % eicar_b64
+        eicar_b64 = "%s\n" % eicar_b64
 
-        EICAR = base64.b64decode(eicar_b64.encode('ascii'))
+        EICAR = base64.b64decode(eicar_b64.encode("ascii"))
         return EICAR
-
 
     def ping(self):
         """
@@ -205,19 +207,17 @@ class _ClamdGeneric(object):
         self._init_socket()
 
         try:
-            self._send_command('PING')
+            self._send_command("PING")
             result = self._recv_response()
             self._close_socket()
         except socket.error:
-            raise ConnectionError('Could not ping clamd server')
+            raise ConnectionError("Could not ping clamd server")
 
-        if result == 'PONG':
+        if result == "PONG":
             return True
         else:
-            raise ConnectionError('Could not ping clamd server [{0}]'.format(result))
+            raise ConnectionError("Could not ping clamd server [{0}]".format(result))
         return
-
-
 
     def version(self):
         """
@@ -230,14 +230,13 @@ class _ClamdGeneric(object):
         """
         self._init_socket()
         try:
-            self._send_command('VERSION')
+            self._send_command("VERSION")
             result = self._recv_response()
             self._close_socket()
         except socket.error:
-            raise ConnectionError('Could not get version information from server')
+            raise ConnectionError("Could not get version information from server")
 
         return result
-
 
     def stats(self):
         """
@@ -250,14 +249,13 @@ class _ClamdGeneric(object):
         """
         self._init_socket()
         try:
-            self._send_command('STATS')
+            self._send_command("STATS")
             result = self._recv_response_multiline()
             self._close_socket()
         except socket.error:
-            raise ConnectionError('Could not get version information from server')
+            raise ConnectionError("Could not get version information from server")
 
         return result
-
 
     def reload(self):
         """
@@ -269,19 +267,16 @@ class _ClamdGeneric(object):
           - ConnectionError: in case of communication problem
         """
 
-
         try:
             self._init_socket()
-            self._send_command('RELOAD')
+            self._send_command("RELOAD")
             result = self._recv_response()
             self._close_socket()
 
         except socket.error:
-            raise ConnectionError('Could probably not reload signature database')
+            raise ConnectionError("Could probably not reload signature database")
 
         return result
-
-
 
     def shutdown(self):
         """
@@ -294,13 +289,11 @@ class _ClamdGeneric(object):
         """
         try:
             self._init_socket()
-            self._send_command('SHUTDOWN')
+            self._send_command("SHUTDOWN")
             self._recv_response()
             self._close_socket()
         except socket.error:
-            raise ConnectionError('Could probably not shutdown clamd')
-
-
+            raise ConnectionError("Could probably not shutdown clamd")
 
     def scan_file(self, file):
         """
@@ -318,40 +311,38 @@ class _ClamdGeneric(object):
           - socket.timeout: if timeout has expired
         """
 
-        assert isstr(file), 'Wrong type for [file], should be a string [was {0}]'.format(type(file))
+        assert isstr(
+            file
+        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
 
         try:
             self._init_socket()
-            self._send_command('SCAN {0}'.format(file))
+            self._send_command("SCAN {0}".format(file))
         except socket.error:
-            raise ConnectionError('Unable to scan {0}'.format(file))
+            raise ConnectionError("Unable to scan {0}".format(file))
 
-        result='...'
-        dr={}
+        result = "..."
+        dr = {}
         while result:
             try:
                 result = self._recv_response()
             except socket.error:
-                raise ConnectionError('Unable to scan {0}'.format(file))
+                raise ConnectionError("Unable to scan {0}".format(file))
 
             if len(result) > 0:
                 filename, reason, status = self._parse_response(result)
 
-                if status == 'ERROR':
-                    dr[filename] = ('ERROR', '{0}'.format(reason))
+                if status == "ERROR":
+                    dr[filename] = ("ERROR", "{0}".format(reason))
                     return dr
 
-                elif status == 'FOUND':
-                    dr[filename] = ('FOUND', '{0}'.format(reason))
+                elif status == "FOUND":
+                    dr[filename] = ("FOUND", "{0}".format(reason))
 
         self._close_socket()
         if not dr:
             return None
         return dr
-
-
-
-
 
     def multiscan_file(self, file):
         """
@@ -368,38 +359,38 @@ class _ClamdGeneric(object):
         May raise:
           - ConnectionError: in case of communication problem
         """
-        assert isstr(file), 'Wrong type for [file], should be a string [was {0}]'.format(type(file))
+        assert isstr(
+            file
+        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
 
         try:
             self._init_socket()
-            self._send_command('MULTISCAN {0}'.format(file))
+            self._send_command("MULTISCAN {0}".format(file))
         except socket.error:
-            raise ConnectionError('Unable to scan {0}'.format(file))
+            raise ConnectionError("Unable to scan {0}".format(file))
 
-        result='...'
-        dr={}
+        result = "..."
+        dr = {}
         while result:
             try:
                 result = self._recv_response()
             except socket.error:
-                raise ConnectionError('Unable to scan {0}'.format(file))
+                raise ConnectionError("Unable to scan {0}".format(file))
 
             if len(result) > 0:
                 for resline in result.splitlines():
                     filename, reason, status = self._parse_response(resline)
 
-                    if status == 'ERROR':
-                        dr[filename] = ('ERROR', '{0}'.format(reason))
+                    if status == "ERROR":
+                        dr[filename] = ("ERROR", "{0}".format(reason))
 
-                    elif status == 'FOUND':
-                        dr[filename] = ('FOUND', '{0}'.format(reason))
+                    elif status == "FOUND":
+                        dr[filename] = ("FOUND", "{0}".format(reason))
 
         self._close_socket()
         if not dr:
             return None
         return dr
-
-
 
     def allmatchscan(self, file):
         """
@@ -416,52 +407,52 @@ class _ClamdGeneric(object):
           - ConnectionError: in case of communication problem
           - socket.timeout: if timeout has expired
         """
-        assert isstr(file), 'Wrong type for [file], should be a string [was {0}]'.format(type(file))
+        assert isstr(
+            file
+        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
 
-        dr={}
+        dr = {}
 
         if os.path.isdir(file):
             for path, subdirs, files in os.walk(file):
                 for name in files:
-                     single_file_result = self.allmatchscan(os.path.join(path,name))
-                     if single_file_result:
-                         dr.update(single_file_result)
+                    single_file_result = self.allmatchscan(os.path.join(path, name))
+                    if single_file_result:
+                        dr.update(single_file_result)
 
         else:
             try:
                 self._init_socket()
-                self._send_command('ALLMATCHSCAN {0}'.format(file))
+                self._send_command("ALLMATCHSCAN {0}".format(file))
             except socket.error:
-                raise ConnectionError('Unable to scan {0}'.format(file))
+                raise ConnectionError("Unable to scan {0}".format(file))
 
-            result='...'
+            result = "..."
 
             while result:
                 try:
                     result = self._recv_response()
                 except socket.error:
-                    raise ConnectionError('Unable to scan {0}'.format(file))
+                    raise ConnectionError("Unable to scan {0}".format(file))
 
                 if len(result) > 0:
                     for resline in result.splitlines():
                         filename, reason, status = self._parse_response(resline)
 
-                        if status == 'ERROR':
+                        if status == "ERROR":
                             if filename not in dr:
                                 dr[filename] = []
-                            dr[filename].append(('ERROR', '{0}'.format(reason)))
+                            dr[filename].append(("ERROR", "{0}".format(reason)))
 
-                        elif status == 'FOUND':
+                        elif status == "FOUND":
                             if filename not in dr:
                                 dr[filename] = []
-                            dr[filename].append(('FOUND', '{0}'.format(reason)))
+                            dr[filename].append(("FOUND", "{0}".format(reason)))
             self._close_socket()
 
         if not dr:
             return None
         return dr
-
-
 
     def contscan_file(self, file):
         """
@@ -478,38 +469,38 @@ class _ClamdGeneric(object):
         May raise:
           - ConnectionError: in case of communication problem
         """
-        assert isstr(file), 'Wrong type for [file], should be a string [was {0}]'.format(type(file))
+        assert isstr(
+            file
+        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
 
         try:
             self._init_socket()
-            self._send_command('CONTSCAN {0}'.format(file))
+            self._send_command("CONTSCAN {0}".format(file))
         except socket.error:
-            raise ConnectionError('Unable to scan  {0}'.format(file))
+            raise ConnectionError("Unable to scan  {0}".format(file))
 
-        result='...'
-        dr={}
+        result = "..."
+        dr = {}
         while result:
             try:
                 result = self._recv_response()
             except socket.error:
-                raise ConnectionError('Unable to scan  {0}'.format(file))
+                raise ConnectionError("Unable to scan  {0}".format(file))
 
             if len(result) > 0:
                 for resline in result.splitlines():
                     filename, reason, status = self._parse_response(resline)
 
-                    if status == 'ERROR':
-                        dr[filename] = ('ERROR', '{0}'.format(reason))
+                    if status == "ERROR":
+                        dr[filename] = ("ERROR", "{0}".format(reason))
 
-                    elif status == 'FOUND':
-                        dr[filename] = ('FOUND', '{0}'.format(reason))
+                    elif status == "FOUND":
+                        dr[filename] = ("FOUND", "{0}".format(reason))
 
         self._close_socket()
         if not dr:
             return None
         return dr
-
-
 
     def scan_stream(self, stream, chunk_size=4096):
         """
@@ -530,26 +521,34 @@ class _ClamdGeneric(object):
         """
         if sys.version_info[0] <= 2:
             # Python2
-            assert hasattr(stream, "read") or isinstance(stream, str), 'Wrong type for [stream], should be str/file-like [was {0}]'.format(type(stream))
+            assert hasattr(stream, "read") or isinstance(
+                stream, str
+            ), "Wrong type for [stream], should be str/file-like [was {0}]".format(
+                type(stream)
+            )
         else:
             # Python3
-            assert hasattr(stream, "read") or isinstance(stream, (bytes, bytearray)), 'Wrong type for [stream], should be bytes/bytearray/file-like [was {0}]'.format(type(stream))
+            assert hasattr(stream, "read") or isinstance(
+                stream, (bytes, bytearray)
+            ), "Wrong type for [stream], should be bytes/bytearray/file-like [was {0}]".format(
+                type(stream)
+            )
 
-        is_file_like = hasattr(stream, 'read')
+        is_file_like = hasattr(stream, "read")
 
         try:
             self._init_socket()
-            self._send_command('INSTREAM')
+            self._send_command("INSTREAM")
 
         except socket.error:
-            raise ConnectionError('Unable to scan stream')
+            raise ConnectionError("Unable to scan stream")
 
         if is_file_like:
             while True:
                 chunk = stream.read(chunk_size)
                 if not chunk:
                     break
-                size = struct.pack('!I', len(chunk))
+                size = struct.pack("!I", len(chunk))
                 try:
                     self.clamd_socket.send(size)
                     self.clamd_socket.send(chunk)
@@ -557,12 +556,12 @@ class _ClamdGeneric(object):
                     raise
 
             # Terminating stream
-            self.clamd_socket.send(struct.pack('!I', 0))
+            self.clamd_socket.send(struct.pack("!I", 0))
         else:
             # bytearray
-            for n in range(1 + int(len(stream)/chunk_size)):
-                chunk = stream[n*chunk_size:(n+1)*chunk_size]
-                size = struct.pack('!I', len(chunk))
+            for n in range(1 + int(len(stream) / chunk_size)):
+                chunk = stream[n * chunk_size : (n + 1) * chunk_size]
+                size = struct.pack("!I", len(chunk))
                 try:
                     self.clamd_socket.send(size)
                     self.clamd_socket.send(chunk)
@@ -570,34 +569,33 @@ class _ClamdGeneric(object):
                     raise
             else:
                 # Terminating stream
-                self.clamd_socket.send(struct.pack('!L', 0))
+                self.clamd_socket.send(struct.pack("!L", 0))
 
-        result='...'
+        result = "..."
         dr = {}
         while result:
             try:
                 result = self._recv_response()
             except socket.error:
-                raise ConnectionError('Unable to scan stream')
+                raise ConnectionError("Unable to scan stream")
 
             if len(result) > 0:
 
-                if result == 'INSTREAM size limit exceeded. ERROR':
+                if result == "INSTREAM size limit exceeded. ERROR":
                     raise BufferTooLongError(result)
 
                 filename, reason, status = self._parse_response(result)
 
-                if status == 'ERROR':
-                    dr[filename] = ('ERROR', '{0}'.format(reason))
+                if status == "ERROR":
+                    dr[filename] = ("ERROR", "{0}".format(reason))
 
-                elif status == 'FOUND':
-                    dr[filename] = ('FOUND', '{0}'.format(reason))
+                elif status == "FOUND":
+                    dr[filename] = ("FOUND", "{0}".format(reason))
 
         self._close_socket()
         if not dr:
             return None
         return dr
-
 
     def _send_command(self, cmd):
         """
@@ -605,9 +603,9 @@ class _ClamdGeneric(object):
         terminated strings, as python<->clamd has some problems with \0x00
         """
         try:
-            cmd = str.encode('n{0}\n'.format(cmd))
+            cmd = str.encode("n{0}\n".format(cmd))
         except UnicodeDecodeError:
-            cmd = 'n{0}\n'.format(cmd)
+            cmd = "n{0}\n".format(cmd)
         self.clamd_socket.send(cmd)
         return
 
@@ -637,20 +635,16 @@ class _ClamdGeneric(object):
 
         return response
 
-
-
     def _recv_response_multiline(self):
         """
         receive multiple line response from clamd and strip all whitespace characters
         """
-        response = ''
-        c = '...'
-        while c != '':
+        response = ""
+        c = "..."
+        while c != "":
             c = self._recv_response()
-            response += '{0}\n'.format(c)
+            response += "{0}\n".format(c)
         return response
-
-
 
     def _close_socket(self):
         """
@@ -659,30 +653,26 @@ class _ClamdGeneric(object):
         self.clamd_socket.close()
         return
 
-
     def _parse_response(self, msg):
         """
         parses responses for SCAN, CONTSCAN, MULTISCAN and STREAM commands.
         """
         msg = msg.strip()
-        filename = msg.split(': ')[0]
-        left = msg.split(': ')[1:]
+        filename = msg.split(": ")[0]
+        left = msg.split(": ")[1:]
         if isstr(left):
             result = left
         else:
             result = ": ".join(left)
 
-        if result != 'OK':
+        if result != "OK":
             parts = result.split()
-            reason = ' '.join(parts[:-1])
+            reason = " ".join(parts[:-1])
             status = parts[-1]
         else:
-            reason, status = '', 'OK'
-
+            reason, status = "", "OK"
 
         return filename, reason, status
-
-
 
 
 ############################################################################
@@ -692,6 +682,7 @@ class ClamdUnixSocket(_ClamdGeneric):
     """
     Class for using clamd with an unix socket
     """
+
     def __init__(self, filename=None, timeout=None):
         """
         Unix Socket Class initialisation
@@ -702,26 +693,36 @@ class ClamdUnixSocket(_ClamdGeneric):
 
         # try to get unix socket from clamd.conf
         if filename is None:
-            for clamdpath in ['/etc/clamav/clamd.conf', '/etc/clamd.conf']:
+            for clamdpath in ["/etc/clamav/clamd.conf", "/etc/clamd.conf"]:
                 if os.path.isfile(clamdpath):
                     break
             else:
-                raise ConnectionError('Could not find clamd unix socket from /etc/clamav/clamd.conf or /etc/clamd.conf')
+                raise ConnectionError(
+                    "Could not find clamd unix socket from /etc/clamav/clamd.conf or /etc/clamd.conf"
+                )
 
-            with open(clamdpath, 'r') as conffile:
+            with open(clamdpath, "r") as conffile:
                 for line in conffile.readlines():
                     try:
-                        if line.strip().split()[0] == 'LocalSocket':
+                        if line.strip().split()[0] == "LocalSocket":
                             filename = line.strip().split()[1]
                             break
                     except IndexError:
                         pass
 
                 else:
-                    raise ConnectionError('Could not find clamd unix socket from /etc/clamav/clamd.conf or /etc/clamd.conf')
+                    raise ConnectionError(
+                        "Could not find clamd unix socket from /etc/clamav/clamd.conf or /etc/clamd.conf"
+                    )
 
-        assert isstr(filename), 'Wrong type for [file], should be a string [was {0}]'.format(type(file))
-        assert isinstance(timeout, (float, int)) or timeout is None, 'Wrong type for [timeout], should be either None or a float [was {0}]'.format(type(timeout))
+        assert isstr(
+            filename
+        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        assert (
+            isinstance(timeout, (float, int)) or timeout is None
+        ), "Wrong type for [timeout], should be either None or a float [was {0}]".format(
+            type(timeout)
+        )
 
         _ClamdGeneric.__init__(self)
 
@@ -734,7 +735,6 @@ class ClamdUnixSocket(_ClamdGeneric):
 
         return
 
-
     def _init_socket(self):
         """
         internal use only
@@ -746,7 +746,11 @@ class ClamdUnixSocket(_ClamdGeneric):
         try:
             self.clamd_socket.connect(self.unix_socket)
         except socket.error:
-            raise ConnectionError('Could not reach clamd using unix socket ({0})'.format((self.unix_socket)))
+            raise ConnectionError(
+                "Could not reach clamd using unix socket ({0})".format(
+                    (self.unix_socket)
+                )
+            )
         return
 
 
@@ -757,7 +761,8 @@ class ClamdNetworkSocket(_ClamdGeneric):
     """
     Class for using clamd with a network socket
     """
-    def __init__(self, host='127.0.0.1', port=3310, timeout=None):
+
+    def __init__(self, host="127.0.0.1", port=3310, timeout=None):
         """
         Network Class initialisation
         host (string) : hostname or ip address
@@ -765,9 +770,17 @@ class ClamdNetworkSocket(_ClamdGeneric):
         timeout (float or None) : socket timeout
         """
 
-        assert isinstance(host, str), 'Wrong type for [host], should be a string [was {0}]'.format(type(host))
-        assert isinstance(port, int), 'Wrong type for [port], should be an int [was {0}]'.format(type(port))
-        assert isinstance(timeout, (float, int)) or timeout is None, 'Wrong type for [timeout], should be either None or a float [was {0}]'.format(type(timeout))
+        assert isinstance(
+            host, str
+        ), "Wrong type for [host], should be a string [was {0}]".format(type(host))
+        assert isinstance(
+            port, int
+        ), "Wrong type for [port], should be an int [was {0}]".format(type(port))
+        assert (
+            isinstance(timeout, (float, int)) or timeout is None
+        ), "Wrong type for [timeout], should be either None or a float [was {0}]".format(
+            type(timeout)
+        )
 
         _ClamdGeneric.__init__(self)
 
@@ -781,7 +794,6 @@ class ClamdNetworkSocket(_ClamdGeneric):
 
         return
 
-
     def _init_socket(self):
         """
         internal use only
@@ -792,13 +804,17 @@ class ClamdNetworkSocket(_ClamdGeneric):
         try:
             self.clamd_socket.connect((self.host, self.port))
         except socket.error:
-            raise ConnectionError('Could not reach clamd using network ({0}, {1})'.format(self.host, self.port))
+            raise ConnectionError(
+                "Could not reach clamd using network ({0}, {1})".format(
+                    self.host, self.port
+                )
+            )
 
         return
 
 
-
 ############################################################################
+
 
 def ClamdAgnostic():
     """
@@ -814,8 +830,11 @@ def ClamdAgnostic():
         try:
             cd = ClamdNetworkSocket()
         except ConnectionError:
-            raise ValueError("could not connect to clamd server either by unix or network socket")
+            raise ValueError(
+                "could not connect to clamd server either by unix or network socket"
+            )
     return cd
+
 
 ############################################################################
 
@@ -824,55 +843,66 @@ def ClamdAgnostic():
 
 socketinst = None
 
-def init_network_socket(host='127.0.0.1', port=3310, timeout=None):
+
+def init_network_socket(host="127.0.0.1", port=3310, timeout=None):
     """Deprecated API - use ClamdNetworkSocket instead."""
     global socketinst
     socketinst = ClamdNetworkSocket(host=host, port=port, timeout=timeout)
+
 
 def init_unix_socket(filename=None):
     """Deprecated API - use ClamdUnixSocket instead."""
     global socketinst
     socketinst = ClamdUnixSocket(filename=filename)
 
+
 def _needs_socket(func):
     """Decorator to check that the global socket is initialised."""
+
     def wrapper(*args, **kw):
         if socketinst is None:
-            raise ConnectionError('socket not initialised')
+            raise ConnectionError("socket not initialised")
         return func(*args, **kw)
+
     wrapper.__doc__ = func.__doc__
     return wrapper
+
 
 @_needs_socket
 def scan_file(file):
     """Deprecated API - use one of the Clamd*Socket classes instead."""
     return socketinst.scan_file(file)
 
+
 @_needs_socket
 def contscan_file(file):
     """Deprecated API - use one of the Clamd*Socket classes instead."""
     return socketinst.contscan_file(file)
+
 
 @_needs_socket
 def multiscan_file(file):
     """Deprecated API - use one of the Clamd*Socket classes instead."""
     return socketinst.multiscan_file(file)
 
+
 @_needs_socket
 def version():
     """Deprecated API - use one of the Clamd*Socket classes instead."""
     return socketinst.version()
 
+
 ############################################################################
 
 
 def _non_regression_test():
-	"""
-	This is for internal use
-	"""
-	import doctest
-	doctest.testmod()
-	return
+    """
+    This is for internal use
+    """
+    import doctest
+
+    doctest.testmod()
+    return
 
 
 ############################################################################
@@ -883,14 +913,15 @@ def _print_doc():
     This is for internal use
     """
     import os
-    os.system('pydoc ./{0}.py'.format(__name__))
+
+    os.system("pydoc ./{0}.py".format(__name__))
     return
 
 
 # MAIN -------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     _non_regression_test()
 
 
-#<EOF>###########################################################################
+# <EOF>###########################################################################

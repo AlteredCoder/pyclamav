@@ -3,6 +3,7 @@ from datetime import datetime
 from . import pyclamd
 from . import utils
 
+
 class Scan:
     """
     A class to scan files using ClamAV.
@@ -29,7 +30,9 @@ class Scan:
                 self.cd = pyclamd.ClamdNetworkSocket()
                 self.cd.ping()
             except pyclamd.ConnectionError:
-                raise ValueError("could not connect to clamd server either by unix or network socket")
+                raise ValueError(
+                    "could not connect to clamd server either by unix or network socket"
+                )
 
     def scan_file(self, file):
         """
@@ -49,7 +52,10 @@ class Scan:
 
         last_modification_dt = datetime.fromtimestamp(file.stat().st_mtime)
         if self.modified_since and last_modification_dt < self.modified_since:
-            self.logger.debug(f"Ignoring file because last modification was '{last_modification_dt}'", extra={"filepath": filepath})
+            self.logger.debug(
+                f"Ignoring file because last modification was '{last_modification_dt}'",
+                extra={"filepath": filepath},
+            )
             return False
 
         with open(filepath, "rb") as f:
@@ -67,7 +73,9 @@ class Scan:
                 message = "Permission denied"
             self.logger.debug(message, extra={"filepath": filepath})
         elif result == "FOUND":
-            self.logger.info(f"File match", extra={"file": filepath, "signature": message})
+            self.logger.info(
+                f"File match", extra={"file": filepath, "signature": message}
+            )
             return True
         else:
             self.logger.info(result, message)

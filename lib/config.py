@@ -11,6 +11,7 @@ from pathlib import Path
 DEFAULT_CONFIG_FILE = "config.json"
 DEFAULT_MODIFIED_FILE_SINCE = "24h"
 
+
 def parse_arg():
     """
     Parse command-line arguments.
@@ -28,15 +29,28 @@ def parse_arg():
         False
     """
     parser = argparse.ArgumentParser(
-                    prog='pyclamav',
-                    description='Python utility that uses ClamAV to scan files',
-                    )
+        prog="pyclamav",
+        description="Python utility that uses ClamAV to scan files",
+    )
 
-    parser.add_argument("-c", "--config", type=str, default=os.path.join(DEFAULT_CONFIG_FILE), help="Path to configuration file")
-    parser.add_argument("--modified-since", type=str, help="Scanning files modified within the last specified duration (e.g., 24h, 48h)")
-    parser.add_argument("-v", "--verbose", action='store_true', default=False, help="Verbose mode")
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        default=os.path.join(DEFAULT_CONFIG_FILE),
+        help="Path to configuration file",
+    )
+    parser.add_argument(
+        "--modified-since",
+        type=str,
+        help="Scanning files modified within the last specified duration (e.g., 24h, 48h)",
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", default=False, help="Verbose mode"
+    )
 
     return parser.parse_args()
+
 
 class Config(BaseModel):
     """
@@ -46,10 +60,15 @@ class Config(BaseModel):
         >>> config.modified_file_datetime
         datetime.datetime(2023, 10, 1, 0, 0)
     """
+
     folders: List[str] = Field(list(), description="Folders to monitor")
     log_folder: str = Field(str, description="Log folder")
-    modified_file_since: str | None = Field(DEFAULT_MODIFIED_FILE_SINCE, description="File modified within the duration")
-    modified_file_datetime: datetime.datetime | None = Field(None, description="File modified within the datetime")
+    modified_file_since: str | None = Field(
+        DEFAULT_MODIFIED_FILE_SINCE, description="File modified within the duration"
+    )
+    modified_file_datetime: datetime.datetime | None = Field(
+        None, description="File modified within the datetime"
+    )
     verbose: bool = Field(False, description="Verbose mode")
 
     @model_validator(mode="after")
@@ -64,6 +83,7 @@ class Config(BaseModel):
         """
         self.modified_file_datetime = dateparser.parse(self.modified_file_since)
         return self
+
 
 def load_config():
     """
@@ -84,7 +104,7 @@ def load_config():
         False
     """
     args = parse_arg()
-    with open(args.config, 'r') as file:
+    with open(args.config, "r") as file:
         loaded_config = json.load(file)
 
     if "log_folder" not in loaded_config:
@@ -98,6 +118,8 @@ def load_config():
 
     return Config(**loaded_config)
 
+
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

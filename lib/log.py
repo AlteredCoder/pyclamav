@@ -6,10 +6,12 @@ from . import utils
 
 LOG_FILENAME = "pyclamav.log"
 
+
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
     def add_fields(self, log_record, record, message_dict):
         super().add_fields(log_record, record, message_dict)
         log_record["time"] = datetime.utcnow().isoformat() + "Z"
+
 
 def get_logger(log_folder, verbose):
     """
@@ -27,7 +29,7 @@ def get_logger(log_folder, verbose):
         >>> logger.info('This is an info message.')
         >>> logger.debug('This is a debug message.')
     """
-    
+
     log_file = os.path.join(log_folder, LOG_FILENAME)
     utils.create_file_folder(log_file)
 
@@ -51,6 +53,8 @@ def get_logger(log_folder, verbose):
 
     return logger
 
+
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
