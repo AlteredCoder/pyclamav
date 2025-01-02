@@ -1,23 +1,28 @@
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
-import os
 import datetime
 import argparse
 from typing import List
-from pydantic import BaseModel, Field, model_validator
 from lib.config import parse_arg, Config, load_config
+from lib.utils import create_file_folder
 import logging
 from pathlib import Path
 from lib import pyclamd
 from lib.scan import Scan
-import multiprocessing
-
+import tempfile
+import shutil
 
 class TestPyclamav(unittest.TestCase):
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+    
+    def tearDown(self):
+        shutil.rmtree(self.test_dir)
+    
     @patch(
         "argparse.ArgumentParser.parse_args",
         return_value=argparse.Namespace(
-            config="test_config.json", modified_since="24h", verbose=False, process=5
+            config="test_config.json", modified_since="24h", verbose=False
         ),
     )
     def test_parse_arg(self, mock_args):
@@ -58,6 +63,30 @@ class TestPyclamav(unittest.TestCase):
         self.assertEqual(config.modified_file_since, "24h")
         self.assertIsInstance(config.modified_file_datetime, datetime.datetime)
         self.assertEqual(config.verbose, False)
+
+    def test_create_file_folder(self):
+        filepath = Path(self.test_dir) / 'subdir' / 'file.txt'
+
+        create_file_folder(filepath)
+
+        self.assertTrue(filepath.parent.exists())
+
+    def test_create_file_folder_existing_directory(self):
+        filepath = Path(self.test_dir) / 'existing_file.txt'
+
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        create_file_folder(filepath)
+
+        self.assertTrue(filepath.parent.exists())
+
+    def test_create_file_folder_nested_directories(self):
+        filepath = Path(self.test_dir) / 'nested' / 'dir1' / 'dir2' / 'file.txt'
+        
+        create_file_folder(filepath)
+        
+        self.assertTrue(filepath.parent.exists())
+
 
     @patch("lib.pyclamd.ClamdUnixSocket")
     @patch("lib.pyclamd.ClamdNetworkSocket")
