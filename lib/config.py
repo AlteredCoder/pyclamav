@@ -6,11 +6,12 @@ import dateparser
 from typing import List
 from pydantic import BaseModel, Field, model_validator
 
-DEFAULT_CONFIG_FILE = "config.json"
-DEFAULT_MODIFIED_FILE_DURATION = "24h"
-DEFAULT_NB_PROCESS = 5
+from pathlib import Path
 
-def parse_arg(current_dir):
+DEFAULT_CONFIG_FILE = "config.json"
+DEFAULT_MODIFIED_FILE_SINCE = "24h"
+
+def parse_arg():
     """
     Parse command-line arguments.
 
@@ -21,7 +22,7 @@ def parse_arg(current_dir):
         >>> args = parse_arg()
         >>> args.config
         'path/to/config.json'
-        >>> args.modified_duration
+        >>> args.modified_since
         '24h'
         >>> args.verbose
         False
@@ -31,10 +32,9 @@ def parse_arg(current_dir):
                     description='Python utility that uses ClamAV to scan files',
                     )
 
-    parser.add_argument("-c", "--config", type=str, default=os.path.join(current_dir, DEFAULT_CONFIG_FILE), help="Path to configuration file")
-    parser.add_argument("--modified-duration", type=str, default=DEFAULT_MODIFIED_FILE_DURATION, help="Scanning files modified within the last specified duration (e.g., 24h, 48h)")
+    parser.add_argument("-c", "--config", type=str, default=os.path.join(DEFAULT_CONFIG_FILE), help="Path to configuration file")
+    parser.add_argument("--modified-since", type=str, help="Scanning files modified within the last specified duration (e.g., 24h, 48h)")
     parser.add_argument("-v", "--verbose", action='store_true', default=False, help="Verbose mode")
-    parser.add_argument("-p", "--process", type=int, default=DEFAULT_NB_PROCESS, help="Number of process")
 
     return parser.parse_args()
 
@@ -42,31 +42,30 @@ class Config(BaseModel):
     """
     Configuration model for pyclamav.
     Example:
-        >>> config = Config(folders=["/path/to/folder"], log_file="pyclamav.log", modified_file_duration="24h", verbose=True)
+        >>> config = Config(folders=["/path/to/folder"], log_folder="/var/log/pyclamav/", modified_file_since="24h", verbose=True)
         >>> config.modified_file_datetime
         datetime.datetime(2023, 10, 1, 0, 0)
     """
     folders: List[str] = Field(list(), description="Folders to monitor")
-    log_file: str = Field(str, description="Log file")
-    modified_file_duration: str = Field(DEFAULT_MODIFIED_FILE_DURATION, description="File modified within the duration")
-    modified_file_datetime: datetime.datetime = Field(None, description="File modified within the datetime")
-    nb_process: int = Field(DEFAULT_NB_PROCESS, description="Number of process")
+    log_folder: str = Field(str, description="Log folder")
+    modified_file_since: str | None = Field(DEFAULT_MODIFIED_FILE_SINCE, description="File modified within the duration")
+    modified_file_datetime: datetime.datetime | None = Field(None, description="File modified within the datetime")
     verbose: bool = Field(False, description="Verbose mode")
 
     @model_validator(mode="after")
     def set_modified_file_datetime(self):
         """
-        Set the modified_file_datetime based on modified_file_duration.
+        Set the modified_file_datetime based on modified_file_since.
 
         Example:
-            >>> config = Config(modified_file_duration="24h")
+            >>> config = Config(modified_file_since="24h")
             >>> config.modified_file_datetime
             datetime.datetime(2023, 10, 1, 0, 0)
         """
-        self.modified_file_datetime = dateparser.parse(self.modified_file_duration)
+        self.modified_file_datetime = dateparser.parse(self.modified_file_since)
         return self
 
-def load_config(current_dir):
+def load_config():
     """
     Load the configuration file as JSON.
 
@@ -77,28 +76,25 @@ def load_config(current_dir):
         >>> config = load_config()
         >>> config.folders
         ['/path/to/folder1', '/path/to/folder2']
-        >>> config.log_file
-        'path/to/log/pyclamav.log'
-        >>> config.modified_file_duration
+        >>> config.log_folder
+        '/var/log/pyclamav/'
+        >>> config.modified_file_since
         '24h'
         >>> config.verbose
         False
     """
-    args = parse_arg(current_dir)
+    args = parse_arg()
     with open(args.config, 'r') as file:
         loaded_config = json.load(file)
 
-    if "log_file" in loaded_config:
-        loaded_config["log_file"] = os.path.join(current_dir, "log", loaded_config["log_file"])
+    if "log_folder" not in loaded_config:
+        loaded_config["log_folder"] = os.path.join(Path.home(), ".pyclamav", "log")
 
-    if args.modified_duration:
-        loaded_config["modified_file_duration"] = args.modified_duration
+    if args.modified_since:
+        loaded_config["modified_file_since"] = args.modified_since
 
     if args.verbose:
         loaded_config["verbose"] = args.verbose
-
-    if args.process:
-        loaded_config["nb_process"] = args.process
 
     return Config(**loaded_config)
 

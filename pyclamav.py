@@ -5,11 +5,9 @@ from lib.log import get_logger
 
 from lib.scan import Scan
 
-CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-
 def main():
-    config = load_config(CURRENT_DIR)
-    logger = get_logger(config.log_file, config.verbose)
+    config = load_config()
+    logger = get_logger(config.log_folder, config.verbose)
     scanner = Scan(config.nb_process, config.modified_file_datetime,logger)
 
     logger.info(f"Scanning with {config.nb_process} process")
