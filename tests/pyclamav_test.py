@@ -12,13 +12,18 @@ from lib import pyclamd
 from lib.scan import Scan
 import multiprocessing
 
-class TestPyclamav(unittest.TestCase):
 
-    @patch('argparse.ArgumentParser.parse_args', return_value=argparse.Namespace(config='test_config.json', modified_since='24h', verbose=False, process=5))
+class TestPyclamav(unittest.TestCase):
+    @patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=argparse.Namespace(
+            config="test_config.json", modified_since="24h", verbose=False, process=5
+        ),
+    )
     def test_parse_arg(self, mock_args):
         args = parse_arg()
-        self.assertEqual(args.config, 'test_config.json')
-        self.assertEqual(args.modified_since, '24h')
+        self.assertEqual(args.config, "test_config.json")
+        self.assertEqual(args.modified_since, "24h")
         self.assertEqual(args.verbose, False)
 
     def test_config_model(self):
@@ -26,7 +31,7 @@ class TestPyclamav(unittest.TestCase):
             "folders": ["/path/to/folder1", "/path/to/folder2"],
             "log_folder": "/var/log/pyclamav",
             "modified_file_since": "24h",
-            "verbose": False
+            "verbose": False,
         }
         config = Config(**config_data)
         self.assertEqual(config.folders, ["/path/to/folder1", "/path/to/folder2"])
@@ -35,8 +40,17 @@ class TestPyclamav(unittest.TestCase):
         self.assertIsInstance(config.modified_file_datetime, datetime.datetime)
         self.assertEqual(config.verbose, False)
 
-    @patch('builtins.open', new_callable=mock_open, read_data='{"folders": ["/path/to/folder1", "/path/to/folder2"], "log_folder": "/var/log/pyclamav/", "modified_file_since": "24h", "nb_process": 5, "verbose": false}')
-    @patch('argparse.ArgumentParser.parse_args', return_value=argparse.Namespace(config='test_config.json', modified_since='24h', verbose=False, process=5))
+    @patch(
+        "builtins.open",
+        new_callable=mock_open,
+        read_data='{"folders": ["/path/to/folder1", "/path/to/folder2"], "log_folder": "/var/log/pyclamav/", "modified_file_since": "24h", "nb_process": 5, "verbose": false}',
+    )
+    @patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=argparse.Namespace(
+            config="test_config.json", modified_since="24h", verbose=False, process=5
+        ),
+    )
     def test_load_config(self, mock_args, mock_file):
         config = load_config()
         self.assertEqual(config.folders, ["/path/to/folder1", "/path/to/folder2"])
@@ -45,8 +59,8 @@ class TestPyclamav(unittest.TestCase):
         self.assertIsInstance(config.modified_file_datetime, datetime.datetime)
         self.assertEqual(config.verbose, False)
 
-    @patch('lib.pyclamd.ClamdUnixSocket')
-    @patch('lib.pyclamd.ClamdNetworkSocket')
+    @patch("lib.pyclamd.ClamdUnixSocket")
+    @patch("lib.pyclamd.ClamdNetworkSocket")
     def test_init(self, mock_network_socket, mock_unix_socket):
         mock_unix_socket.return_value.ping.return_value = None
         mock_network_socket.return_value.ping.return_value = None
@@ -57,8 +71,8 @@ class TestPyclamav(unittest.TestCase):
         self.assertIsInstance(scan.logger, logging.Logger)
         self.assertIsInstance(scan.modified_since, datetime.datetime)
 
-    @patch('lib.pyclamd.ClamdUnixSocket')
-    @patch('lib.pyclamd.ClamdNetworkSocket')
+    @patch("lib.pyclamd.ClamdUnixSocket")
+    @patch("lib.pyclamd.ClamdNetworkSocket")
     def test_init_connection_error(self, mock_network_socket, mock_unix_socket):
         mock_unix_socket.side_effect = pyclamd.ConnectionError
         mock_network_socket.side_effect = pyclamd.ConnectionError
@@ -67,23 +81,23 @@ class TestPyclamav(unittest.TestCase):
         with self.assertRaises(ValueError):
             Scan(modified_since=datetime.datetime.now(), logger=logger)
 
-    @patch('lib.pyclamd.ClamdUnixSocket')
-    @patch('lib.pyclamd.ClamdNetworkSocket')
+    @patch("lib.pyclamd.ClamdUnixSocket")
+    @patch("lib.pyclamd.ClamdNetworkSocket")
     def test_scan_file(self, mock_network_socket, mock_unix_socket):
         mock_unix_socket.return_value.ping.return_value = None
         mock_network_socket.return_value.ping.return_value = None
         mock_unix_socket.return_value.scan_stream.return_value = {
-            "stream" : ("FOUND", "EICAR")
+            "stream": ("FOUND", "EICAR")
         }
 
         logger = logging.getLogger()
         scan = Scan(modified_since=None, logger=logger)
 
-        file = Path('./tests/data/EICAR')
+        file = Path("./tests/data/EICAR")
         self.assertTrue(scan.scan_file(file))
 
-    @patch('lib.pyclamd.ClamdUnixSocket')
-    @patch('lib.pyclamd.ClamdNetworkSocket')
+    @patch("lib.pyclamd.ClamdUnixSocket")
+    @patch("lib.pyclamd.ClamdNetworkSocket")
     @patch("pathlib.Path.stat")
     def test_scan_file_too_old(self, mock_network_socket, mock_unix_socket, mock_stat):
         mock_unix_socket.return_value.ping.return_value = None
@@ -94,26 +108,30 @@ class TestPyclamav(unittest.TestCase):
         fake_stat.mt_time = file_modification_dt.timestamp()
 
         logger = logging.getLogger()
-        scan = Scan(modified_since=datetime.datetime.now() - datetime.timedelta(days=2), logger=logger)
+        scan = Scan(
+            modified_since=datetime.datetime.now() - datetime.timedelta(days=2),
+            logger=logger,
+        )
 
-        file = Path('./tests/data/EICAR')
+        file = Path("./tests/data/EICAR")
         self.assertFalse(scan.scan_file(file))
 
-    @patch('lib.pyclamd.ClamdUnixSocket')
-    @patch('lib.pyclamd.ClamdNetworkSocket')
+    @patch("lib.pyclamd.ClamdUnixSocket")
+    @patch("lib.pyclamd.ClamdNetworkSocket")
     def test_scan_folder(self, mock_network_socket, mock_unix_socket):
         mock_unix_socket.return_value.ping.return_value = None
         mock_network_socket.return_value.ping.return_value = None
         mock_unix_socket.return_value.scan_stream.return_value = {
-            "stream" : ("FOUND", "EICAR")
+            "stream": ("FOUND", "EICAR")
         }
 
         logger = logging.getLogger()
         scan = Scan(modified_since=None, logger=logger)
 
-        results = scan.scan_folder('./tests/data/')
+        results = scan.scan_folder("./tests/data/")
 
         self.assertEqual(len(results), 1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
