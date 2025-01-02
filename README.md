@@ -1,4 +1,5 @@
 ![Tests](https://github.com/AlteredCoder/pyclamav/actions/workflows/pytest.yml/badge.svg)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AlteredCoder/88ae1c5c4c732ba28346b3fac87b44a3/raw/covbadge.json)
 
 # pyclamav
 
