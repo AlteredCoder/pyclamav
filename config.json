@@ -1,6 +1,5 @@
 {
     "folders" : [],
     "log_folder": "/var/log/pyclamav/",
-    "nb_process" : 2,
     "modified_file_since" : "24h"
 }
