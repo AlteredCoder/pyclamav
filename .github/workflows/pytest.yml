@@ -1,20 +1,28 @@
 name: Tests
 
-on: [push]
+on:
+  push:
+    branch: main
+  pull_request:
+    paths:
+      - "**.py"
+      - ".github/workflows/pytest.yml"
 
 jobs:
   tests:
+    strategy:
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install requirements.txt
-        run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
+      - name: Install UV
+        run: astral-sh/setup-uv@v5
+        python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/ruff-action@v3      
       - name: Run the tests
         run: pytest --cov --cov-report=json:coverage.json tests/
       - name: Extract coverage

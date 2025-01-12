@@ -1,6 +1,13 @@
 name: Pylint
 
-on: [push]
+on:
+  push:
+    branch: main
+  pull_request:
+    paths:
+      - "**.py"
+      - ".github/workflows/pytest.yml"
+
 
 jobs:
   lint:
