@@ -23,7 +23,11 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: astral-sh/ruff-action@v3      
+      - name: UV sync
+        run: uv sync
+      - name: Install pytest
+        run: uv tool install pytest
+      - uses: astral-sh/ruff-action@v3
       - name: Run the tests
         run: pytest --cov --cov-report=json:coverage.json tests/
       - name: Extract coverage
@@ -32,7 +36,7 @@ jobs:
         uses: schneegans/dynamic-badges-action@v1.4.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
-          gistID: 88ae1c5c4c732ba28346b3fac87b44a3 
+          gistID: 88ae1c5c4c732ba28346b3fac87b44a3
           filename: covbadge.json
           label: Coverage
           message: ${{ env.total }}%
