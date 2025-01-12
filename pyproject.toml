@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "dateparser>=1.2.0",
     "logging>=0.4.9.6",
+    "pre-commit>=4.0.1",
     "pyclamd>=0.4.0",
     "pydantic>=2.10.5",
     "pytest>=8.3.4",
