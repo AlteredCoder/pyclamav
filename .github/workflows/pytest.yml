@@ -26,7 +26,7 @@ jobs:
       - name: UV sync
         run: uv sync
       - name: Install pytest
-        run: uv tool install pytest
+        run: uv tool install pytest pytest-cov
       - uses: astral-sh/ruff-action@v3
       - name: Run the tests
         run: pytest --cov --cov-report=json:coverage.json tests/
