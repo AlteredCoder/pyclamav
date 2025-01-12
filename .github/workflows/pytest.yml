@@ -20,8 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install UV
-        run: astral-sh/setup-uv@v5
-        python-version: ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
       - uses: astral-sh/ruff-action@v3      
       - name: Run the tests
         run: pytest --cov --cov-report=json:coverage.json tests/
