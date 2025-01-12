@@ -157,17 +157,8 @@ class ConnectionError(socket.error):
     """Class for errors communication with clamd"""
 
 
-# Python 2/3 compatibility
-try:
-    basestring  # attempt to evaluate basestring
-
-    def isstr(s):
-        return isinstance(s, basestring)
-
-except NameError:
-
-    def isstr(s):
-        return isinstance(s, str)
+def isstr(s):
+    return isinstance(s, str)
 
 
 ############################################################################
@@ -311,9 +302,9 @@ class _ClamdGeneric(object):
           - socket.timeout: if timeout has expired
         """
 
-        assert isstr(
-            file
-        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        assert isstr(file), (
+            "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        )
 
         try:
             self._init_socket()
@@ -359,9 +350,9 @@ class _ClamdGeneric(object):
         May raise:
           - ConnectionError: in case of communication problem
         """
-        assert isstr(
-            file
-        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        assert isstr(file), (
+            "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        )
 
         try:
             self._init_socket()
@@ -407,9 +398,9 @@ class _ClamdGeneric(object):
           - ConnectionError: in case of communication problem
           - socket.timeout: if timeout has expired
         """
-        assert isstr(
-            file
-        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        assert isstr(file), (
+            "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        )
 
         dr = {}
 
@@ -469,9 +460,9 @@ class _ClamdGeneric(object):
         May raise:
           - ConnectionError: in case of communication problem
         """
-        assert isstr(
-            file
-        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        assert isstr(file), (
+            "Wrong type for [file], should be a string [was {0}]".format(type(file))
+        )
 
         try:
             self._init_socket()
@@ -521,17 +512,17 @@ class _ClamdGeneric(object):
         """
         if sys.version_info[0] <= 2:
             # Python2
-            assert hasattr(stream, "read") or isinstance(
-                stream, str
-            ), "Wrong type for [stream], should be str/file-like [was {0}]".format(
-                type(stream)
+            assert hasattr(stream, "read") or isinstance(stream, str), (
+                "Wrong type for [stream], should be str/file-like [was {0}]".format(
+                    type(stream)
+                )
             )
         else:
             # Python3
-            assert hasattr(stream, "read") or isinstance(
-                stream, (bytes, bytearray)
-            ), "Wrong type for [stream], should be bytes/bytearray/file-like [was {0}]".format(
-                type(stream)
+            assert hasattr(stream, "read") or isinstance(stream, (bytes, bytearray)), (
+                "Wrong type for [stream], should be bytes/bytearray/file-like [was {0}]".format(
+                    type(stream)
+                )
             )
 
         is_file_like = hasattr(stream, "read")
@@ -580,7 +571,6 @@ class _ClamdGeneric(object):
                 raise ConnectionError("Unable to scan stream")
 
             if len(result) > 0:
-
                 if result == "INSTREAM size limit exceeded. ERROR":
                     raise BufferTooLongError(result)
 
@@ -693,7 +683,11 @@ class ClamdUnixSocket(_ClamdGeneric):
 
         # try to get unix socket from clamd.conf
         if filename is None:
-            for clamdpath in ["/etc/clamav/clamd.conf", "/etc/clamd.conf", "/opt/homebrew/etc/clamav/clamd.conf"]:
+            for clamdpath in [
+                "/etc/clamav/clamd.conf",
+                "/etc/clamd.conf",
+                "/opt/homebrew/etc/clamav/clamd.conf",
+            ]:
                 if os.path.isfile(clamdpath):
                     break
             else:
@@ -715,13 +709,13 @@ class ClamdUnixSocket(_ClamdGeneric):
                         "Could not find clamd unix socket from /etc/clamav/clamd.conf or /etc/clamd.conf"
                     )
 
-        assert isstr(
-            filename
-        ), "Wrong type for [file], should be a string [was {0}]".format(type(file))
-        assert (
-            isinstance(timeout, (float, int)) or timeout is None
-        ), "Wrong type for [timeout], should be either None or a float [was {0}]".format(
-            type(timeout)
+        assert isstr(filename), (
+            "Wrong type for [file], should be a string [was {0}]".format(type(filename))
+        )
+        assert isinstance(timeout, (float, int)) or timeout is None, (
+            "Wrong type for [timeout], should be either None or a float [was {0}]".format(
+                type(timeout)
+            )
         )
 
         _ClamdGeneric.__init__(self)
@@ -740,7 +734,7 @@ class ClamdUnixSocket(_ClamdGeneric):
         internal use only
         """
         self.clamd_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        if not self.timeout is None:
+        if self.timeout:
             self.clamd_socket.settimeout(self.timeout)
 
         try:
@@ -770,16 +764,16 @@ class ClamdNetworkSocket(_ClamdGeneric):
         timeout (float or None) : socket timeout
         """
 
-        assert isinstance(
-            host, str
-        ), "Wrong type for [host], should be a string [was {0}]".format(type(host))
-        assert isinstance(
-            port, int
-        ), "Wrong type for [port], should be an int [was {0}]".format(type(port))
-        assert (
-            isinstance(timeout, (float, int)) or timeout is None
-        ), "Wrong type for [timeout], should be either None or a float [was {0}]".format(
-            type(timeout)
+        assert isinstance(host, str), (
+            "Wrong type for [host], should be a string [was {0}]".format(type(host))
+        )
+        assert isinstance(port, int), (
+            "Wrong type for [port], should be an int [was {0}]".format(type(port))
+        )
+        assert isinstance(timeout, (float, int)) or timeout is None, (
+            "Wrong type for [timeout], should be either None or a float [was {0}]".format(
+                type(timeout)
+            )
         )
 
         _ClamdGeneric.__init__(self)
@@ -799,7 +793,7 @@ class ClamdNetworkSocket(_ClamdGeneric):
         internal use only
         """
         self.clamd_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if not self.timeout is None:
+        if self.timeout:
             self.clamd_socket.settimeout(self.timeout)
         try:
             self.clamd_socket.connect((self.host, self.port))
@@ -920,7 +914,6 @@ def _print_doc():
 
 # MAIN -------------------
 if __name__ == "__main__":
-
     _non_regression_test()
 
 

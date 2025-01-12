@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import datetime
 import argparse
-from typing import List
 from lib.config import parse_arg, Config, load_config
 from lib.utils import create_file_folder
 import logging
@@ -12,13 +11,14 @@ from lib.scan import Scan
 import tempfile
 import shutil
 
+
 class TestPyclamav(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
-    
+
     def tearDown(self):
         shutil.rmtree(self.test_dir)
-    
+
     @patch(
         "argparse.ArgumentParser.parse_args",
         return_value=argparse.Namespace(
@@ -65,14 +65,14 @@ class TestPyclamav(unittest.TestCase):
         self.assertEqual(config.verbose, False)
 
     def test_create_file_folder(self):
-        filepath = Path(self.test_dir) / 'subdir' / 'file.txt'
+        filepath = Path(self.test_dir) / "subdir" / "file.txt"
 
         create_file_folder(filepath)
 
         self.assertTrue(filepath.parent.exists())
 
     def test_create_file_folder_existing_directory(self):
-        filepath = Path(self.test_dir) / 'existing_file.txt'
+        filepath = Path(self.test_dir) / "existing_file.txt"
 
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
@@ -81,12 +81,11 @@ class TestPyclamav(unittest.TestCase):
         self.assertTrue(filepath.parent.exists())
 
     def test_create_file_folder_nested_directories(self):
-        filepath = Path(self.test_dir) / 'nested' / 'dir1' / 'dir2' / 'file.txt'
-        
-        create_file_folder(filepath)
-        
-        self.assertTrue(filepath.parent.exists())
+        filepath = Path(self.test_dir) / "nested" / "dir1" / "dir2" / "file.txt"
 
+        create_file_folder(filepath)
+
+        self.assertTrue(filepath.parent.exists())
 
     @patch("lib.pyclamd.ClamdUnixSocket")
     @patch("lib.pyclamd.ClamdNetworkSocket")

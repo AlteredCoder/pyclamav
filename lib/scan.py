@@ -74,7 +74,7 @@ class Scan:
             self.logger.debug(message, extra={"filepath": filepath})
         elif result == "FOUND":
             self.logger.info(
-                f"File match", extra={"file": filepath, "signature": message}
+                "File match", extra={"file": filepath, "signature": message}
             )
             return True
         else:
