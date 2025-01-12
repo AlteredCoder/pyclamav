@@ -693,7 +693,7 @@ class ClamdUnixSocket(_ClamdGeneric):
 
         # try to get unix socket from clamd.conf
         if filename is None:
-            for clamdpath in ["/etc/clamav/clamd.conf", "/etc/clamd.conf"]:
+            for clamdpath in ["/etc/clamav/clamd.conf", "/etc/clamd.conf", "/opt/homebrew/etc/clamav/clamd.conf"]:
                 if os.path.isfile(clamdpath):
                     break
             else:
